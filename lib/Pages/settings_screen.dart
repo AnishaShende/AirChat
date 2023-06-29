@@ -1,0 +1,58 @@
+import 'package:chat_app/services/auth/auth_gate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:neumorphic_ui/neumorphic_ui.dart';
+
+class SettingsScreen extends StatefulWidget {
+  SettingsScreen({super.key});
+  final userCredential = FirebaseAuth.instance.currentUser;
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    return Builder(builder: (context) {
+      return Scaffold(
+        body: Container(
+          width: screenSize.width,
+          height: screenSize.height * 0.1,
+          padding: const EdgeInsets.all(10.0),
+          decoration: const BoxDecoration(
+            color: Color(0xFF333333),
+            borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(15),
+                bottomRight: Radius.circular(15)),
+          ),
+          child: Center(
+            child: GestureDetector(
+              onTap: deleteAccount,
+              child: const Text(
+                'Delete account',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  deleteAccount() async {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AuthGate(),
+        ));
+    final cuser = _auth.currentUser!.uid.toString();
+    _firestore.collection('users').doc(cuser).delete();
+    await _auth.currentUser!.delete();
+  }
+}
