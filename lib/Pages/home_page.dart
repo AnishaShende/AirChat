@@ -1,5 +1,5 @@
 import 'package:chat_app/Pages/home_screen.dart';
-import 'package:chat_app/services/auth/auth_servieces.dart';
+import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'settings_screen.dart';
