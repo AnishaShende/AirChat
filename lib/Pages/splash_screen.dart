@@ -32,6 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: Color(0xFFEBEAEA),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Lottie.network(
                 "https://assets10.lottiefiles.com/packages/lf20_nhmiuj9f.json",
@@ -40,7 +41,10 @@ class _SplashScreenState extends State<SplashScreen>
                 ..duration = compos.duration
                 ..forward().then((value) => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => AuthGate())));
-            }),
+            },
+            width: MediaQuery.of(context).size.height*0.30,
+            height: MediaQuery.of(context).size.height*0.30,
+            ),
             Text("AirChat", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF333333),),),
           ],
         ),
