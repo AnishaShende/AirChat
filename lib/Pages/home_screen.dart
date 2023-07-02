@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:neumorphic_ui/neumorphic_ui.dart';
 
 import 'chat_page.dart';
 
@@ -32,10 +34,18 @@ class _HomeScreenState extends State<HomeScreen> {
           return const Text('Loading...');
         }
 
-        return ListView(
-          children: snapshot.data!.docs
-              .map<Widget>((doc) => _buildUserListItem(doc))
-              .toList(),
+        return LiquidPullToRefresh(
+          onRefresh: _handleRefresh,
+          color: Colors.deepPurple,
+          height: 200,
+          backgroundColor: Colors.deepPurple.shade200,
+          animSpeedFactor: 2,
+          showChildOpacityTransition: true,
+          child: ListView(
+            children: snapshot.data!.docs
+                .map<Widget>((doc) => _buildUserListItem(doc))
+                .toList(),
+          ),
         );
       },
     );
@@ -45,12 +55,21 @@ class _HomeScreenState extends State<HomeScreen> {
     Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
 
     if (_auth.currentUser!.email != data['email']) {
-      return InkWell(
-        child: ListTile(  
-          leading: CircleAvatar(child: Icon(Icons.person),),
+      return Padding(
+        padding: EdgeInsets.all(10.0),
+        child: ListTile(
+          leading: CircleAvatar(
+            child: Icon(Icons.person),
+          ),
           title: Text(data['name']),
-          subtitle: Text('Last user message', maxLines: 1,),
-          trailing: Text('11:11 AM', style: TextStyle(color: Colors.grey.shade900),),
+          subtitle: Text(
+            'Last user message',
+            maxLines: 1,
+          ),
+          trailing: Text(
+            '11:11 AM',
+            style: TextStyle(color: Colors.deepPurple),
+          ),
           onTap: () {
             Navigator.push(
                 context,
@@ -67,5 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return Container();
     }
+  }
+
+  Future<void> _handleRefresh() async {
+    return await Future.delayed(Duration(seconds: 2));
   }
 }
