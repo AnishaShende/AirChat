@@ -3,6 +3,7 @@ import 'package:chat_app/components/my_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:neumorphic_ui/neumorphic_ui.dart';
 import '../services/chat/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
@@ -35,7 +36,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEBEAEA),
+      backgroundColor: NeumorphicColors.background,
       appBar: AppBar(
         title: Text(widget.receiverUserName),
         backgroundColor: const Color(0xFF333333),

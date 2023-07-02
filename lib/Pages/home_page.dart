@@ -1,8 +1,12 @@
 import 'package:chat_app/Pages/home_screen.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:flutter/material.dart';
+import 'package:neumorphic_ui/neumorphic_ui.dart';
 import 'package:provider/provider.dart';
+import 'history_screen.dart';
 import 'settings_screen.dart';
+import 'package:dot_navigation_bar/dot_navigation_bar.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,16 +27,19 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     const HomeScreen(),
+    const HistoryScreen(),
     SettingsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEBEAEA),
+      backgroundColor: NeumorphicColors.darkBackground,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         backgroundColor: const Color(0xFF333333),
-        title: const Text("Home Page "),
+        title: const Text("AirChat"),
         actions: [
           IconButton(
             onPressed: signOut,
@@ -41,17 +48,22 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: DotNavigationBar(
+        backgroundColor: NeumorphicColors.darkBackground,
+        selectedItemColor: NeumorphicColors.background,
+        unselectedItemColor: Colors.grey,
+        margin: EdgeInsets.all(5),
           currentIndex: _currentIndex,
           onTap: (int index) {
             setState(() {
               _currentIndex = index;
             });
           },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.settings), label: 'Settings'),
+          items: [
+            DotNavigationBarItem(icon: Icon(Icons.home)),
+            DotNavigationBarItem(icon: Icon(Icons.history)),
+            DotNavigationBarItem(
+                icon: Icon(Icons.settings)),
           ]),
     );
   }

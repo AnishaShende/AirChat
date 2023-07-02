@@ -21,22 +21,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final screenSize = MediaQuery.of(context).size;
     return Builder(builder: (context) {
       return Scaffold(
-        body: Container(
-          width: screenSize.width,
-          height: screenSize.height * 0.1,
-          padding: const EdgeInsets.all(10.0),
-          decoration: const BoxDecoration(
-            color: Color(0xFF333333),
-            borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(15),
-                bottomRight: Radius.circular(15)),
-          ),
-          child: Center(
-            child: GestureDetector(
-              onTap: deleteAccount,
-              child: const Text(
-                'Delete account',
-                style: TextStyle(color: Colors.white, fontSize: 16),
+        backgroundColor: NeumorphicColors.background,
+        body: GestureDetector(
+          onTap: deleteAccount,
+          child: Container(
+            width: screenSize.width,
+            height: screenSize.height * 0.2,
+            child: Neumorphic(
+              margin: EdgeInsets.all(10),
+              style: NeumorphicStyle(
+                shape: NeumorphicShape.concave,
+                boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)), 
+                depth: 7,
+                lightSource: LightSource.topLeft,
+                intensity: 0.75,
+                // color: Colors.grey
+              ),
+              // width: screenSize.width,
+              // height: screenSize.height * 0.1,
+              padding: const EdgeInsets.all(20.0),
+              // decoration: const BoxDecoration(
+              //   color: Color(0xFF333333),
+              //   borderRadius: BorderRadius.only(
+              //       topLeft: Radius.circular(15),
+              //       topRight: Radius.circular(15),
+              //       bottomLeft: Radius.circular(15),
+              //       bottomRight: Radius.circular(15)),
+              // ),
+              child: Center(
+                child: const Text(
+                  'Delete account',
+                  style: TextStyle(color: NeumorphicColors.darkBackground, fontSize: 18),
+                ),
               ),
             ),
           ),
