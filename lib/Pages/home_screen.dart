@@ -56,31 +56,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_auth.currentUser!.email != data['email']) {
       return Padding(
-        padding: EdgeInsets.all(10.0),
-        child: ListTile(
-          leading: CircleAvatar(
-            child: Icon(Icons.person),
+        padding: const EdgeInsets.only(top: 8),
+        child: Card(
+          elevation: 0.5,
+          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: ListTile(
+            // tileColor: Color(0xFFEBEAEA),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            leading: CircleAvatar(
+              child: Icon(Icons.person),
+            ),
+            title: Text(data['name']),
+            subtitle: Text(
+              // 'Last user message',
+              "data['message']",
+              maxLines: 1,
+            ),
+            trailing: Text(
+              '11:11 AM',
+              style: TextStyle(color: NeumorphicColors.darkBackground),
+            ),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPage(
+                      receiverUserEmail: data['email'],
+                      receiverUserName: data['name'],
+                      receiverUserID: data['uid'],
+                    ),
+                  ));
+            },
           ),
-          title: Text(data['name']),
-          subtitle: Text(
-            'Last user message',
-            maxLines: 1,
-          ),
-          trailing: Text(
-            '11:11 AM',
-            style: TextStyle(color: Colors.deepPurple),
-          ),
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatPage(
-                    receiverUserEmail: data['email'],
-                    receiverUserName: data['name'],
-                    receiverUserID: data['uid'],
-                  ),
-                ));
-          },
         ),
       );
     } else {
