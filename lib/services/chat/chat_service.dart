@@ -37,6 +37,6 @@ class ChatService extends ChangeNotifier {
         .collection('chat_rooms')
         .doc(chatRoomId)
         .collection('messages')
-        .orderBy('timestamp', descending: false).snapshots();  // Because of Fucking 's' which I mistakenly added in timestamp, messages were not visible and my whole day was wasted to solve this fucking bug XXXXX WTFFF
+        .orderBy('timestamp', descending: false).snapshots();  // Because of fucking 's' which I mistakenly added in timestamp, messages were not visible and my whole day was wasted to solve this fucking bug XXXXX WTFFF
   }
 }

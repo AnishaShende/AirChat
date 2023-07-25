@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,10 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Text('Error!');
+          return Center(child: const Text('Error!',  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('Loading...');
+          return Center(child: const Text('Loading...', style: TextStyle(color: NeumorphicColors.darkBackground, fontWeight: FontWeight.bold),));
         }
 
         return LiquidPullToRefresh(
@@ -62,14 +63,25 @@ class _HomeScreenState extends State<HomeScreen> {
           margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           child: ListTile(
             // tileColor: Color(0xFFEBEAEA),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            leading: CircleAvatar(
-              child: Icon(Icons.person),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            // leading: CircleAvatar(
+            //   child: Icon(Icons.person),
+            // ),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+              imageUrl: 'assets/images/kim_taehyung_profile.jfif',
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+                    ),
             ),
             title: Text(data['name']),
             subtitle: Text(
               // 'Last user message',
-              "data['message']",
+              'last message',
               maxLines: 1,
             ),
             trailing: Text(

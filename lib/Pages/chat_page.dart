@@ -56,10 +56,10 @@ class _ChatPageState extends State<ChatPage> {
     return StreamBuilder(stream: _chatService.getMessages(widget.receiverUserID, _firebaseAuth.currentUser!.uid),
     builder: (context, snapshot) {
       if(snapshot.hasError){
-        return Text('Error ${snapshot.error}');
+        return Center(child: Text('Error ${snapshot.error}',  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),));
       }
       if(snapshot.connectionState == ConnectionState.waiting){
-        return const Text('Loading...');
+        return Center(child: const Text('Loading...',  style: TextStyle(color: NeumorphicColors.darkBackground, fontWeight: FontWeight.bold),));
       }
       return ListView(
         children: snapshot.data!.docs.map((document) => _buildMessageItem(document)).toList(),
