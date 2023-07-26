@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/components/my_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
@@ -11,9 +11,11 @@ import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+// import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -26,81 +28,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          children: [
-            // Spacer(),
-            image != null
-                ? ClipOval(
-                    child: Image.network(
-                      image!,
-                      height: 160,
-                      width: 160,
-                      fit: BoxFit.cover,
-                    ),
-                    // NetworkImage(image!),
-                    //   child: Image.file(
-                    //   image!,
-                    //   height: 160,
-                    //   width: 160,
-                    //   fit: BoxFit.cover,
-                    // )
-                  )
-                : FlutterLogo(
-                    size: 160,
-                  ), // ClipOval(child: Image.file(image!, height: 160, width: 160, fit: BoxFit.cover,))
-            SizedBox(
-              height: 48,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                pickFile();
-              },
-              style: ElevatedButton.styleFrom(
-                  minimumSize: Size.fromHeight(56),
-                  primary: Colors.white,
-                  onPrimary: Colors.black,
-                  textStyle: TextStyle(fontSize: 20)),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.photo,
-                    size: 28,
-                  ),
-                  SizedBox(
-                    width: 16,
-                  ),
-                  Text('Select from Gallery'),
-                ],
+      body: Center(
+        child: Container(
+          padding: EdgeInsets.all(32),
+          child: Column(
+            children: [
+              // Spacer(),
+              image != null
+                  ? ClipOval(
+                      child: Image.network(
+                        image!,
+                        height: 160,
+                        width: 160,
+                        fit: BoxFit.cover,
+                      ),
+                      // NetworkImage(image!),
+                      //   child: Image.file(
+                      //   image!,
+                      //   height: 160,
+                      //   width: 160,
+                      //   fit: BoxFit.cover,
+                      // )
+                    )
+                  : FlutterLogo(
+                      size: 160,
+                    ), // ClipOval(child: Image.file(image!, height: 160, width: 160, fit: BoxFit.cover,))
+
+              SizedBox(
+                height: 48,
               ),
-            ),
-            SizedBox(
-              height: 24,
-            ),
-            // ElevatedButton(
-            //   onPressed: () async {
-            //     pickFile();
-            //   },
-            //   style: ElevatedButton.styleFrom(
-            //       minimumSize: Size.fromHeight(56),
-            //       primary: Colors.white,
-            //       onPrimary: Colors.black,
-            //       textStyle: TextStyle(fontSize: 20)),
-            //   child: Row(
-            //     children: [
-            //       Icon(
-            //         Icons.photo,
-            //         size: 28,
-            //       ),
-            //       SizedBox(
-            //         width: 16,
-            //       ),
-            //       Text('Select from Camera'),
-            //     ],
-            //   ),
-            // ),
-          ],
+              ElevatedButton(
+                onPressed: () async {
+                  pickFile();
+                },
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size.fromHeight(56),
+                    textStyle: TextStyle(fontSize: 20)),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.photo,
+                      size: 28,
+                    ),
+                    SizedBox(
+                      width: 16,
+                    ),
+                    Text('Select from Gallery'),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 24,
+              ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     pickFile();
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //       minimumSize: Size.fromHeight(56),
+              //       primary: Colors.white,
+              //       onPrimary: Colors.black,
+              //       textStyle: TextStyle(fontSize: 20)),
+              //   child: Row(
+              //     children: [
+              //       Icon(
+              //         Icons.photo,
+              //         size: 28,
+              //       ),
+              //       SizedBox(
+              //         width: 16,
+              //       ),
+              //       Text('Select from Camera'),
+              //     ],
+              //   ),
+              // ),
+            ],
+          ),
         ),
       ),
     );
@@ -175,42 +178,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // );
   }
 
+  Future<File?> compressImage(File file) async {
+    // Compress the image using flutter_image_compress
+    Uint8List? compressedData = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      quality: 85,
+    );
+    File compressedFile = File('${file.path}.jpg');
+    await compressedFile.writeAsBytes(compressedData!);
+    return compressedFile;
+  }
+
   pickFile() async {
-  FilePickerResult? results;
-
-  if (kIsWeb) {
-    results = await FilePicker.platform.pickFiles(
+    FilePickerResult? results = await FilePicker.platform.pickFiles(
       allowMultiple: false,
       type: FileType.custom,
       allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
     );
-  } else {
-    results = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      type: FileType.custom,
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
-    );
+
+    if (results == null || results.files.isEmpty) {
+      MyDialog.mySnackBar(context, 'No file selected!');
+      return;
+    }
+
+    final path = kIsWeb ? null : results.files.single.path;
+    final filename = results.files.single.name;
+
+    if (kIsWeb && results.files.first.bytes != null) {
+      final fileBytes = results.files.first.bytes;
+      final fileURL = await uploadFileWeb(fileBytes!, filename);
+      if (fileURL != null) {
+        setState(() {
+          image = fileURL;
+        });
+      }
+    } else if (!kIsWeb && path != null) {
+      final compressedFile = await compressImage(File(path));
+      if (compressedFile != null) {
+        final fileURL = await uploadFile(compressedFile.path, filename);
+        if (fileURL != null) {
+          setState(() {
+            image = fileURL;
+          });
+        }
+      }
+    }
   }
 
-  if (results == null || results.files.isEmpty) {
-    MyDialog.mySnackBar(context, 'No file selected!');
-    return;
-  }
+  // pickFile() async {
+  //   // FilePickerResult? results;
+  //   FilePickerResult? results = await FilePicker.platform.pickFiles(
+  //     allowMultiple: false,
+  //       type: FileType.custom,
+  //       allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+  //     );
 
-  final path = kIsWeb ? null : results.files.single.path;
-  final filename = results.files.single.name;
+  //   if (kIsWeb) {
+  //     results = await FilePicker.platform.pickFiles(
+  //       allowMultiple: false,
+  //       type: FileType.custom,
+  //       allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+  //     );
+  //   } else {
+  //     results = await FilePicker.platform.pickFiles(
+  //       allowMultiple: false,
+  //       type: FileType.custom,
+  //       allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+  //     );
+  //   }
 
-  if (kIsWeb && results.files.first.bytes != null) {
-    // If on web platform, use bytes property to handle the file content
-    final fileBytes = results.files.first.bytes;
-    uploadFileWeb(fileBytes!, filename).then((value) => print('Done'));
-  } else if (!kIsWeb && path != null) {
-    // For non-web platforms, use the local file path
-    uploadFile(path, filename).then((value) => print('Done'));
-  }
-}
+  //   if (results == null || results.files.isEmpty) {
+  //     MyDialog.mySnackBar(context, 'No file selected!');
+  //     return;
+  //   }
 
-  Future<void> uploadFile(String path, String filename) async {
+  //   final path = kIsWeb ? null : results.files.single.path;
+  //   final filename = results.files.single.name;
+
+  //   if (kIsWeb && results.files.first.bytes != null) {
+  //     // If on web platform, use bytes property to handle the file content
+  //     final fileBytes = results.files.first.bytes;
+  //     // uploadFileWeb(fileBytes!, filename).then((value) {
+  //     final fileURL = await uploadFileWeb(fileBytes!, filename);
+  //     if (fileURL != null) {
+  //       setState(() {
+  //         image = fileURL;
+  //       });
+  //     }
+  //   } else if (!kIsWeb && path != null) {
+  //     // For non-web platforms, use the local file path
+  //     // uploadFile(path, filename).then((value) => print('Done'));
+  //     // final fileURL = await uploadFile(path, filename);
+  //     // if (fileURL != null) {
+  //     //   setState(() {
+  //     //     image = fileURL;
+  //     //   });
+  //     // }
+  //     final compressedFile = await compressImage(File(path));
+  //     if (compressedFile != null) {
+  //       final fileURL = await uploadFile(compressedFile.path, filename);
+  //       if (fileURL != null) {
+  //         setState(() {
+  //           image = fileURL;
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
+
+  Future<String?> uploadFile(String path, String filename) async {
     File file = File(path);
 
     try {
@@ -230,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // 'about': me.about,
         'imageURL': fileURL,
       });
-
+      return fileURL;
       // final image = await ImagePicker().pickImage(source: source);
       // if (image == null) {
       //   MyDialog.mySnackBar(context, 'No file selected!');
@@ -244,35 +320,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // });
     } on FirebaseException catch (e) {
       print(e);
+      return null;
     }
   }
 
+  // Future<void> uploadFileWeb(Uint8List fileBytes, String filename) async {
+  //   try {
+  //     final Reference ref = storage.ref('AirChat/$filename');
 
-  Future<void> uploadFileWeb(Uint8List fileBytes, String filename) async {
-  try {
-    final Reference ref = storage.ref('AirChat/$filename');
+  //     // Upload the file to Cloud Storage using putData method for web
+  //     final TaskSnapshot snapshot = await ref.putData(fileBytes);
 
-    // Upload the file to Cloud Storage using putData method for web
-    final TaskSnapshot snapshot = await ref.putData(fileBytes);
+  //     // Get the download URL of the uploaded file
+  //     final String fileURL = await snapshot.ref.getDownloadURL();
 
-    // Get the download URL of the uploaded file
-    final String fileURL = await snapshot.ref.getDownloadURL();
+  //     // Update the imageURL field in Firestore
+  //     final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+  //     await FirebaseFirestore.instance
+  //         .collection('users')
+  //         .doc(currentUserId)
+  //         .update({
+  //       'imageURL': fileURL,
+  //     });
 
-    // Update the imageURL field in Firestore
-    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance.collection('users').doc(currentUserId).update({
-      'imageURL': fileURL,
-    });
+  //     // Update the image variable and trigger a rebuild
+  //     image = fileURL;
+  //     setState(() {});
 
-    // Update the image variable and trigger a rebuild
-    image = fileURL;
-    setState(() {});
+  //     print('File uploaded successfully!');
+  //   } catch (e) {
+  //     print('Error uploading file: $e');
+  //   }
+  // }
 
-    print('File uploaded successfully!');
-  } catch (e) {
-    print('Error uploading file: $e');
+  Future<String?> uploadFileWeb(Uint8List fileBytes, String filename) async {
+    try {
+      final Reference ref = storage.ref('AirChat/$filename');
+
+      // Upload the file to Cloud Storage using putData method for web
+      final TaskSnapshot snapshot = await ref.putData(fileBytes);
+
+      // Get the download URL of the uploaded file
+      final String fileURL = await snapshot.ref.getDownloadURL();
+
+      // Update the imageURL field in Firestore
+      final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .update({
+        'imageURL': fileURL,
+      });
+
+      print('File uploaded successfully!');
+
+      return fileURL; // Return the file URL
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null; // Return null in case of an error
+    }
   }
-}
 
 //   void uploadImage() {}
 //   // void _pickImageGallery() async {

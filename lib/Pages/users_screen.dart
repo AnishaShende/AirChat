@@ -20,6 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // backgroundColor: Colors.grey[300],
+      backgroundColor: NeumorphicColors.background,
       body: _buildUserList(),
     );
   }
@@ -29,10 +31,21 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(child: const Text('Error!',  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),));
+          return Center(
+              child: const Text(
+            'Error!',
+            style:
+                TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+          ));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: const Text('Loading...', style: TextStyle(color: NeumorphicColors.darkBackground, fontWeight: FontWeight.bold),));
+          return Center(
+              child: const Text(
+            'Loading...',
+            style: TextStyle(
+                color: NeumorphicColors.darkBackground,
+                fontWeight: FontWeight.bold),
+          ));
         }
 
         return LiquidPullToRefresh(
@@ -57,48 +70,84 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_auth.currentUser!.email != data['email']) {
       return Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Card(
-          elevation: 0.5,
-          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: ListTile(
-            // tileColor: Color(0xFFEBEAEA),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            // leading: CircleAvatar(
-            //   child: Icon(Icons.person),
-            // ),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: CachedNetworkImage(
-              imageUrl: 'assets/images/kim_taehyung_profile.jfif',
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => CircleAvatar(
-                child: Icon(Icons.person),
+        padding: const EdgeInsets.only(top: 15, right: 15, left: 15),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height*0.099,
+          width: MediaQuery.of(context).size.width*0.8,
+          child: Neumorphic(
+            style: NeumorphicStyle(
+                depth: 8, //customize depth here
+                lightSource: LightSource.topLeft,
+                // color: NeumorphicColors.background,
+                shape: NeumorphicShape.concave,
+                // color: Colors.grey,
+                boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+                intensity: 0.89,
+                surfaceIntensity: 0.3,
+                //     border: NeumorphicBorder(
+                //   color: Color(0x33000000),
+                //   width: 0.8,
+                // ),
+                ),
+            // elevation: 0.5,
+            // margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            child: Center(
+              child: ListTile(
+                // tileColor: Color(0xFFEBEAEA),
+                shape:
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                // leading: CircleAvatar(
+                //   child: Icon(Icons.person),
+                // ),
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: CachedNetworkImage(
+                    imageUrl: data['imageURL'],
+                    height: MediaQuery.of(context).size.height * 0.06,
+                    width: MediaQuery.of(context).size.height * 0.06,
+                    fit: BoxFit.cover,
+                    // 'assets/images/kim_taehyung_profile.jfif',
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      child: Icon(Icons.person),
+                    ),
+                  ),
+                ),
+                title: Padding(
+                  padding: const EdgeInsets.only(left: 7),
+                  child: Text(
+                    data['name'],
+                    style: TextStyle(
+                        color: NeumorphicColors.darkBackground,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 7),
+                  child: Text(
+                    // 'Last user message',
+                    'last message',
+                    maxLines: 1,
+                    style: TextStyle(color: NeumorphicColors.darkBackground),
+                  ),
+                ),
+                trailing: Text(
+                  '11:11 AM',
+                  style: TextStyle(color: NeumorphicColors.darkBackground),
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                          receiverUserEmail: data['email'],
+                          receiverUserName: data['name'],
+                          receiverUserID: data['uid'],
+                        ),
+                      ));
+                },
               ),
-                    ),
             ),
-            title: Text(data['name']),
-            subtitle: Text(
-              // 'Last user message',
-              'last message',
-              maxLines: 1,
-            ),
-            trailing: Text(
-              '11:11 AM',
-              style: TextStyle(color: NeumorphicColors.darkBackground),
-            ),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatPage(
-                      receiverUserEmail: data['email'],
-                      receiverUserName: data['name'],
-                      receiverUserID: data['uid'],
-                    ),
-                  ));
-            },
           ),
         ),
       );

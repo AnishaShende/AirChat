@@ -1,9 +1,9 @@
-import 'package:chat_app/Pages/home_page.dart';
+// import 'package:chat_app/Pages/home_page.dart';
 import 'package:chat_app/Pages/profile_screen.dart';
 import 'package:chat_app/services/auth/auth_gate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: deleteAccount,
               child: Container(
                 width: screenSize.width,
-                height: screenSize.height * 0.2,
+                height: screenSize.height * 0.15,
                 child: Neumorphic(
                   margin: EdgeInsets.all(10),
                   style: NeumorphicStyle(
@@ -66,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: UpdateProfile,
               child: Container(
                 width: screenSize.width,
-                height: screenSize.height * 0.2,
+                height: screenSize.height * 0.15,
                 child: Neumorphic(
                   margin: EdgeInsets.all(10),
                   style: NeumorphicStyle(
