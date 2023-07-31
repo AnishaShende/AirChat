@@ -24,6 +24,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  bool theme = false;
 
   void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
@@ -36,63 +37,155 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: NeumorphicColors.background,
+      backgroundColor:
+          theme ? NeumorphicColors.darkBackground : NeumorphicColors.background,
       appBar: AppBar(
         title: Text(widget.receiverUserName),
         backgroundColor: const Color(0xFF333333),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: () {
+                theme = !theme;
+                setState(() {});
+              },
+              icon: Icon(
+                Icons.favorite_rounded,
+                color: theme ? Colors.redAccent : NeumorphicColors.background,
+              ),
+              color: NeumorphicColors.darkBackground,
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Expanded(child: _buildMessageList(),),
+          Expanded(
+            child: _buildMessageList(),
+          ),
           _buildMessageInput(),
-          const SizedBox(height: 25,)
         ],
       ),
     );
   }
 
-
   Widget _buildMessageList() {
-    return StreamBuilder(stream: _chatService.getMessages(widget.receiverUserID, _firebaseAuth.currentUser!.uid),
-    builder: (context, snapshot) {
-      if(snapshot.hasError){
-        return Center(child: Text('Error ${snapshot.error}',  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),));
-      }
-      if(snapshot.connectionState == ConnectionState.waiting){
-        return Center(child: const Text('Loading...',  style: TextStyle(color: NeumorphicColors.darkBackground, fontWeight: FontWeight.bold),));
-      }
-      return ListView(
-        children: snapshot.data!.docs.map((document) => _buildMessageItem(document)).toList(),
-      );
-    },
+    return StreamBuilder(
+      stream: _chatService.getMessages(
+          widget.receiverUserID, _firebaseAuth.currentUser!.uid),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+              child: Text(
+            'Error ${snapshot.error}',
+            style:
+                TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+          ));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+              child: const Text(
+            'Loading...',
+            style: TextStyle(
+                color: NeumorphicColors.darkBackground,
+                fontWeight: FontWeight.bold),
+          ));
+        }
+        return ListView(
+          children: snapshot.data!.docs
+              .map((document) => _buildMessageItem(document))
+              .toList(),
+        );
+      },
     );
   }
 
-  Widget _buildMessageItem(DocumentSnapshot document){
+  Widget _buildMessageItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-    var alignment = (data['senderId'] == _firebaseAuth.currentUser!.uid) ? Alignment.centerRight : Alignment.centerLeft;
-    return Container(
-      alignment: alignment,
-      child: Column(
-        crossAxisAlignment: (data['senderId'] == _firebaseAuth.currentUser!.uid) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        mainAxisAlignment: (data['senderId'] == _firebaseAuth.currentUser!.uid) ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          // Text(data['senderEmail'],),
-          const SizedBox(height: 5,),
-          // Text(data['message'],),
-          ChatBubble(message: data['message'],),
-        ],
+    var alignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: Container(
+        alignment: alignment,
+        child: Column(
+          crossAxisAlignment:
+              (data['senderId'] == _firebaseAuth.currentUser!.uid)
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+          mainAxisAlignment:
+              (data['senderId'] == _firebaseAuth.currentUser!.uid)
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.start,
+          children: [
+            // Text(data['senderEmail'],),
+            const SizedBox(
+              height: 5,
+            ),
+            // Text(data['message'],),
+            ChatBubble(
+              message: data['message'],
+              theme: theme,
+              isSender: (data['senderId'] == _firebaseAuth.currentUser!.uid)
+                  ? true
+                  : false,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMessageInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
       child: Row(
         children: [
-          Expanded(child: MyTextField(controller: _messageController, hintText: 'Enter message', obscureText: false),),
-          IconButton(onPressed: sendMessage, icon: const Icon(Icons.arrow_upward), iconSize: 40,),
+          IconButton(
+            onPressed: sendMessage,
+            icon: const Icon(Icons.emoji_emotions_outlined),
+            iconSize: 30,
+            color: theme
+                ? NeumorphicColors.background
+                : NeumorphicColors.darkBackground,
+          ),
+          Expanded(
+            child: MyTextField(
+              controller: _messageController,
+              hintText: 'Enter message',
+              obscureText: false,
+              extraFeatures: false,
+            ),
+          ),
+          IconButton(
+            onPressed: sendMessage,
+            icon: const Icon(Icons.photo),
+            iconSize: 30,
+            color: theme
+                ? NeumorphicColors.background
+                : NeumorphicColors.darkBackground,
+          ),
+          IconButton(
+            onPressed: sendMessage,
+            icon: const Icon(Icons.camera_enhance_rounded),
+            iconSize: 30,
+            color: theme
+                ? NeumorphicColors.background
+                : NeumorphicColors.darkBackground,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: IconButton(
+              onPressed: sendMessage,
+              icon: const Icon(Icons.arrow_upward),
+              iconSize: 40,
+              color: theme
+                  ? NeumorphicColors.background
+                  : NeumorphicColors.darkBackground,
+            ),
+          ),
         ],
       ),
     );

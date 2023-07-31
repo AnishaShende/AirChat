@@ -25,8 +25,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void signUp() async {
     if (passwordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Passwords do not match!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Passwords do not match!")));
       return;
     }
 
@@ -73,6 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   controller: emailController,
                   hintText: 'Email',
                   obscureText: false,
+                  extraFeatures: false,
                 ),
                 const SizedBox(
                   height: 10,
@@ -81,21 +82,26 @@ class _RegisterPageState extends State<RegisterPage> {
                   controller: nameController,
                   hintText: 'Name',
                   obscureText: false,
+                  extraFeatures: false,
                 ),
                 const SizedBox(
                   height: 10,
                 ),
                 MyTextField(
-                    controller: passwordController,
-                    hintText: 'Password',
-                    obscureText: true),
+                  controller: passwordController,
+                  hintText: 'Password',
+                  obscureText: true,
+                  extraFeatures: false,
+                ),
                 const SizedBox(
                   height: 10,
                 ),
                 MyTextField(
-                    controller: confirmPasswordController,
-                    hintText: 'Confirm password',
-                    obscureText: true),
+                  controller: confirmPasswordController,
+                  hintText: 'Confirm password',
+                  obscureText: true,
+                  extraFeatures: false,
+                ),
                 const SizedBox(
                   height: 25,
                 ),
