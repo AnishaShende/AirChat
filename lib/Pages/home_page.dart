@@ -1,3 +1,4 @@
+import 'package:anim_search_bar/anim_search_bar.dart';
 import 'package:chat_app/Pages/users_screen.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
@@ -16,10 +17,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void signOut() {
-    final authServices = Provider.of<AuthServices>(context, listen: false);
-    authServices.signOut();
-  }
+  // void signOut() {
+  //   final authServices = Provider.of<AuthServices>(context, listen: false);
+  //   authServices.signOut();
+  // }
 
   int _currentIndex = 0; // Current selected index of the bottom navigation bar
 
@@ -28,6 +29,8 @@ class _HomePageState extends State<HomePage> {
     const HistoryScreen(),
     SettingsScreen(),
   ];
+
+  TextEditingController textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +42,38 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color(0xFF333333),
         title: const Text("AirChat"),
         actions: [
-          IconButton(
-            onPressed: signOut,
-            icon: const Icon(Icons.logout),
-          ),
+          // Center(
+          //   child: Padding(
+          //     padding: const EdgeInsets.only(top: 3, bottom: 3, right: 5, left: 1),
+          //     child: AnimSearchBar(
+          //       width: MediaQuery.of(context).size.width * 0.98,
+          //       textController: textController,
+          //       onSuffixTap: () {
+          //         setState(() {
+          //           textController.clear();
+          //         });
+          //       }, onSubmitted: (String ) {  },
+          //       color: NeumorphicColors.background,
+          //       searchIconColor: NeumorphicColors.darkBackground,
+          //       textFieldIconColor: NeumorphicColors.darkBackground,
+          //       textFieldColor: NeumorphicColors.background,
+          //       helpText: 'Search',
+          //       autoFocus: true,
+          //       rtl: true,
+          //       prefixIcon: Icon(Icons.search_rounded, weight: 2, color: NeumorphicColors.darkBackground, size: 30,),
+          //       suffixIcon: Icon(Icons.cancel_outlined, color: NeumorphicColors.darkBackground, weight: 2, size: 30,),
+          //       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          //     ),
+          //   ),
+          // ),
+          // IconButton(
+          //   onPressed: signOut,
+          //   icon: const Icon(Icons.logout),
+          // ),
+          // IconButton(
+          //   onPressed: signOut,
+          //   icon: const Icon(Icons.logout),
+          // ),
         ],
       ),
       body: _pages[_currentIndex],

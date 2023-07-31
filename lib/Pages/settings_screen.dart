@@ -1,10 +1,14 @@
 // import 'package:chat_app/Pages/home_page.dart';
 import 'package:chat_app/Pages/profile_screen.dart';
+// import 'package:chat_app/components/my_dialog.dart';
 import 'package:chat_app/services/auth/auth_gate.dart';
+import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
+import 'package:provider/provider.dart';
+import 'package:chat_app/components/my_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   SettingsScreen({super.key});
@@ -17,6 +21,19 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isPressed = false;
+
+  void _onTapDown(TapDownDetails details) {
+    setState(() {
+      _isPressed = true;
+    });
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    setState(() {
+      _isPressed = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +52,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   margin: EdgeInsets.all(10),
                   style: NeumorphicStyle(
                     shape: NeumorphicShape.concave,
-                    boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)), 
+                    boxShape:
+                        NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
                     depth: 7,
                     lightSource: LightSource.topLeft,
                     intensity: 0.75,
@@ -55,13 +73,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Center(
                     child: const Text(
                       'Delete account',
-                      style: TextStyle(color: NeumorphicColors.darkBackground, fontSize: 18),
+                      style: TextStyle(
+                          color: NeumorphicColors.darkBackground, fontSize: 18),
                     ),
                   ),
                 ),
               ),
             ),
-
             GestureDetector(
               onTap: UpdateProfile,
               child: Container(
@@ -71,7 +89,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   margin: EdgeInsets.all(10),
                   style: NeumorphicStyle(
                     shape: NeumorphicShape.concave,
-                    boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)), 
+                    boxShape:
+                        NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
                     depth: 7,
                     lightSource: LightSource.topLeft,
                     intensity: 0.75,
@@ -91,13 +110,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Center(
                     child: const Text(
                       'Edit profile',
-                      style: TextStyle(color: NeumorphicColors.darkBackground, fontSize: 18),
+                      style: TextStyle(
+                          color: NeumorphicColors.darkBackground, fontSize: 18),
                     ),
                   ),
                 ),
               ),
             ),
-
+            Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: GestureDetector(
+                    // onTap: () => MyDialog.myConfirmationDialog(
+                    //     context, signOut, () => Navigator.of(context).pop()),
+                    onTapDown: _onTapDown,
+                    onTapUp: _onTapUp,
+                    onTapCancel: () {
+                      setState(() {
+                        _isPressed = false;
+                      });
+                    },
+                    child: NeumorphicButton(
+                      onPressed: () {
+                        MyDialog.myConfirmationDialog(context, signOut,
+                            () => Navigator.of(context).pop());
+                        _isPressed = !_isPressed;
+                      },
+                      child: Icon(Icons.logout,
+                          color: NeumorphicColors.background),
+                      // onPressed: ,//signOut,
+                      style: NeumorphicStyle(
+                        shape: NeumorphicShape
+                            .convex, // You can use concave shape as well
+                        boxShape: NeumorphicBoxShape.circle(),
+                        color: NeumorphicColors.darkBackground,
+                        depth: _isPressed
+                            ? -8
+                            : 4, // Adjust the depth for the neumorphic effect
+                        intensity: _isPressed
+                            ? 0.6
+                            : 0.8, // Adjust intensity as needed
+                      ), // Adjust intensity as needed
+                    ),
+                  ),
+                ))
           ],
         ),
       );
@@ -124,5 +181,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // final cuser = _auth.currentUser!.uid.toString();
     // _firestore.collection('users').doc(cuser).delete();
     // await _auth.currentUser!.delete();
+  }
+
+  void signOut() {
+    Navigator.of(context).pop();
+    final authServices = Provider.of<AuthServices>(context, listen: false);
+    authServices.signOut();
   }
 }

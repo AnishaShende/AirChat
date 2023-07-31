@@ -49,6 +49,8 @@ dependencies:
   firebase_storage: ^11.2.5
   file_picker: ^5.3.3
   flutter_image_compress: ^2.0.4
+  flutter_image_compress_common: ^1.0.2
+  anim_search_bar: ^2.0.3
   # flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
