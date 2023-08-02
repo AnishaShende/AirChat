@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return LiquidPullToRefresh(
           onRefresh: _handleRefresh,
-          color: Colors.deepPurple,
+          color: Colors.redAccent,
           height: 200,
           backgroundColor: Colors.deepPurple.shade200,
           animSpeedFactor: 2,

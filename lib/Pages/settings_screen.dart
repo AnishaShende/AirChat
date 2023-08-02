@@ -44,7 +44,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         body: Column(
           children: [
             GestureDetector(
-              onTap: deleteAccount,
+              onTap: (){
+                MyDialog.myConfirmationDialog(context,'Do you want to delete your AirChat account?', deleteAccount,
+                            () => Navigator.of(context).pop());
+              },//deleteAccount,
               child: Container(
                 width: screenSize.width,
                 height: screenSize.height * 0.15,
@@ -133,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                     child: NeumorphicButton(
                       onPressed: () {
-                        MyDialog.myConfirmationDialog(context, signOut,
+                        MyDialog.myConfirmationDialog(context, 'Do you want to Logout?', signOut,
                             () => Navigator.of(context).pop());
                         _isPressed = !_isPressed;
                       },

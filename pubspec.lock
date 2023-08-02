@@ -17,6 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  another_flutter_splash_screen:
+    dependency: "direct main"
+    description:
+      name: another_flutter_splash_screen
+      sha256: "03a1f56b4425a7d19410e6299a642be33e3a020e29484d3fd4320a9c7e3f0e04"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
   archive:
     dependency: transitive
     description:

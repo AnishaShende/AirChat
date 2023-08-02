@@ -32,6 +32,11 @@ class _ChatPageState extends State<ChatPage> {
           widget.receiverUserID, _messageController.text);
       _messageController.clear();
     }
+    else {
+      await _chatService.sendMessage(
+          widget.receiverUserID, 'Hello!');
+      _messageController.clear();
+    }
   }
 
   @override

@@ -52,6 +52,7 @@ dependencies:
   flutter_image_compress_common: ^1.0.2
   anim_search_bar: ^2.0.3
   chat_bubbles: ^1.4.1
+  another_flutter_splash_screen: ^1.1.4
   # flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
@@ -100,6 +101,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/splash_animation.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

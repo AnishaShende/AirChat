@@ -19,7 +19,7 @@ class MyDialog {
             )));
   }
 
-  static void myConfirmationDialog(BuildContext context,
+  static void myConfirmationDialog(BuildContext context, String text,
       VoidCallback onYesPressed, VoidCallback onNoPressed) async {
     return showDialog<void>(
       context: context,
@@ -45,7 +45,7 @@ class MyDialog {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Do you want to Logout?',
+                    text,//'Do you want to Logout?',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   SizedBox(height: 16),
