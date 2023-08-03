@@ -11,12 +11,16 @@ class ChatService extends ChangeNotifier {
     final String currentUserId = _auth.currentUser!.uid;
     final String currentUserEmail = _auth.currentUser!.email.toString();
     final Timestamp timestamp = Timestamp.now();
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
     Message newMessage = Message(
-        senderId: currentUserId,
-        senderEmail: currentUserEmail,
-        receiverId: receiverId,
-        timestamp: timestamp,
-        message: message);
+      senderId: currentUserId,
+      senderEmail: currentUserEmail,
+      receiverId: receiverId,
+      timestamp: timestamp,
+      message: message,
+      read: '',
+      send: time,
+    );
 
     List<String> ids = [currentUserId, receiverId];
     ids.sort();
@@ -37,6 +41,21 @@ class ChatService extends ChangeNotifier {
         .collection('chat_rooms')
         .doc(chatRoomId)
         .collection('messages')
-        .orderBy('timestamp', descending: false).snapshots();  // Because of fucking 's' which I mistakenly added in timestamp, messages were not visible and my whole day was wasted to solve this fucking bug XXXXX WTFFF
+        .orderBy('timestamp', descending: false)
+        .snapshots(); // Because of fucking 's' which I mistakenly added in timestamp, messages were not visible and my whole day was wasted to solve this fucking bug XXXXX WTFFF
+  }
+
+  Future<void> markMessageAsRead(
+      String messageId, String userId, String otherUserId) async {
+    List<String> ids = [userId, otherUserId];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    await _firestore
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .doc(messageId) // Assuming messageId is the document ID of the message
+        .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
   }
 }
