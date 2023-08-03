@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:neumorphic_ui/neumorphic_ui.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -26,6 +27,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final FirebaseStorage storage = FirebaseStorage.instance;
   var currentUser = FirebaseAuth.instance.currentUser;
+  late String userName;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  void fetchUserName() async {
+    try {
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .get();
+
+      if (documentSnapshot.exists) {
+        // The document exists, you can access the field value using the field name.
+        setState(() {
+          userName = documentSnapshot.get('name');
+        });
+      } else {
+        Center(child: Text('Loading ...'));
+        // Document does not exist, handle the case if needed.
+        // print('Document does not exist!');
+      }
+    } catch (error) {
+      Center(child: Text('Loading ...'));
+      // Handle the error if any.
+      // print('Error fetching document: $error');
+    }
+  }
+
+// Get the document reference for the specific document you want to fetch
+// DocumentReference userDocument = usersCollection.doc('document_id'); // Replace 'document_id' with the ID of the specific document you want to fetch.
+
+// // Fetch the document using the get() method
+// userDocument.get().then((DocumentSnapshot documentSnapshot) {
+//   if (documentSnapshot.exists) {
+//     // The document exists, you can access the field value using the field name.
+//     var userName = documentSnapshot.get('userName');
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +75,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
+          backgroundColor: NeumorphicColors.background,
+          appBar: AppBar(
+            title: Text('Edit Profile'),
+            backgroundColor: NeumorphicColors.darkBackground,
+          ),
           body: Form(
             key: _formKey,
             child: Padding(
@@ -96,8 +142,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 _showBottomSheet();
                               },
                               shape: const CircleBorder(),
-                              color: Colors.white,
-                              child: const Icon(Icons.edit, color: Colors.blue),
+                              color: NeumorphicColors.background,
+                              child: const Icon(Icons.edit,
+                                  color: NeumorphicColors.darkBackground),
                             ),
                           )
                         ],
@@ -116,21 +163,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       // name input field
                       TextFormField(
-                        initialValue: currentUser!.displayName,
+                        initialValue: userName,
                         // onSaved: (val) => currentUser.displayName = val ?? '',
                         onSaved: (val) => _currentUserName = val,
                         validator: (val) => val != null && val.isNotEmpty
                             ? null
                             : 'Required Field',
                         decoration: InputDecoration(
-                            prefixIcon:
-                                const Icon(Icons.person, color: Colors.blue),
+                            prefixIcon: Icon(Icons.person,
+                                color: NeumorphicColors.darkBackground),
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12)),
                             hintText: 'eg. Anisha Shende',
                             label: const Text('Name')),
                       ),
-
+                      // debugPrint(_currentUserName);
                       // for adding some space
                       SizedBox(height: mq.height * .02),
 
@@ -152,24 +199,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       // for adding some space
                       SizedBox(height: mq.height * .05),
+                      // print('Current user name: $_currentUserName'),
 
                       // update profile button
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
+                            backgroundColor: NeumorphicColors.darkBackground,
                             shape: const StadiumBorder(),
                             minimumSize: Size(mq.width * .5, mq.height * .06)),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
-                            updateUserInfo().then((value) {
-                              MyDialog.mySnackBar(
-                                  context, 'Profile Updated Successfully!');
-                            });
+                            updateUserName();
+                            print('_currentUserName - $_currentUserName');
+                            print(
+                                'current user display name - $currentUser!.displayName');
+                            // updateUserInfo().then((value) {
+                            MyDialog.mySnackBar(
+                                context, 'Profile Updated Successfully!');
+                            // });
                           }
                         },
-                        icon: const Icon(Icons.edit, size: 28),
-                        label: const Text('UPDATE',
-                            style: TextStyle(fontSize: 16)),
+                        icon: const Icon(
+                          Icons.edit,
+                          size: 28,
+                          color: NeumorphicColors.background,
+                        ),
+                        label: const Text('Update',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: NeumorphicColors.background)),
                       )
                     ],
                   ),
@@ -243,9 +302,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _formKey.currentState!.save();
       if (_currentUserName != null) {
         // Update the currentUser's displayName using updateProfile method
-        await FirebaseAuth.instance.currentUser!
-            .updateDisplayName(_currentUserName!);
+        // await FirebaseAuth.instance.currentUser!
+        //     .updateDisplayName(_currentUserName!);
         // MyDialog.mySnackBar(context, 'Profile Updated Successfully!');
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser!.uid)
+            .set({
+          'name': _currentUserName,
+        }, SetOptions(merge: true));
       }
     }
   }
@@ -440,8 +505,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () async {
                         final ImagePicker picker = ImagePicker();
                         // Pick an image
-                        final XFile? image = await picker.pickImage(
-                            source: ImageSource.camera);
+                        final XFile? image =
+                            await picker.pickImage(source: ImageSource.camera);
                         if (image != null) {
                           log('Image Path: ${image.path}');
                           uploadViaCamera(image.name, image.name);

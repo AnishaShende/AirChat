@@ -20,7 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String formattedTime = '';
   bool isRead = false;
-  late bool isCurrentUserSender;
+  late bool isCurrentUserSender = true;
+  String lastMes = '';
 
   @override
   Widget build(BuildContext context) {
@@ -157,15 +158,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.redAccent, fontWeight: FontWeight.bold),
             ));
           }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-                child: const Text(
-              'Loading...',
-              style: TextStyle(
-                  color: NeumorphicColors.darkBackground,
-                  fontWeight: FontWeight.bold),
-            ));
-          }
+          // if (snapshot.connectionState == ConnectionState.waiting) {
+          //   return Center(
+          //       child: const Text(
+          //     'Loading...',
+          //     style: TextStyle(
+          //         color: NeumorphicColors.darkBackground,
+          //         fontWeight: FontWeight.bold),
+          //   ));
+          // }
 
           if (snapshot.hasData) {
             List<QueryDocumentSnapshot> messages = snapshot.data!.docs;
@@ -173,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // Get the last message's timestamp
               Timestamp lastMessageTimestamp = messages.last['timestamp'];
               DateTime lastMessageTime = lastMessageTimestamp.toDate();
+              lastMes = messages.last['message'];
 
               // Now, you can use lastMessageTime to display the time of the last message
               formattedTime = DateFormat('hh:mm a').format(lastMessageTime);
@@ -298,8 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       subtitle: Padding(
                         padding: const EdgeInsets.only(left: 7),
                         child: Text(
-                          // 'Last user message',
-                          'last message',
+                          lastMes,
                           maxLines: 1,
                           style:
                               TextStyle(color: NeumorphicColors.darkBackground),
