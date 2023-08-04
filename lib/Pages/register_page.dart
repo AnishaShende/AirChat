@@ -70,6 +70,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   height: 25,
                 ),
                 MyTextField(
+                  focusNode: FocusNode(),
                   controller: emailController,
                   hintText: 'Email',
                   obscureText: false,
@@ -79,6 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   height: 10,
                 ),
                 MyTextField(
+                  focusNode: FocusNode(),
                   controller: nameController,
                   hintText: 'Name',
                   obscureText: false,
@@ -88,6 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   height: 10,
                 ),
                 MyTextField(
+                  focusNode: FocusNode(),
                   controller: passwordController,
                   hintText: 'Password',
                   obscureText: true,
@@ -97,6 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   height: 10,
                 ),
                 MyTextField(
+                  focusNode: FocusNode(),
                   controller: confirmPasswordController,
                   hintText: 'Confirm password',
                   obscureText: true,

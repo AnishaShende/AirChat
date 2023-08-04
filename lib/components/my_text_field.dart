@@ -6,16 +6,19 @@ class MyTextField extends StatelessWidget {
       required this.controller,
       required this.hintText,
       required this.obscureText,
-      required this.extraFeatures});
+      required this.extraFeatures,
+      required this.focusNode});
 
   final TextEditingController controller;
   final String hintText;
   final bool obscureText;
   final bool extraFeatures;
+  final FocusNode focusNode;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      focusNode: focusNode,
       keyboardType: TextInputType.multiline,
       maxLines: extraFeatures ? null : 1,
       maxLength: extraFeatures ? 500 : null,
@@ -32,7 +35,6 @@ class MyTextField extends StatelessWidget {
           filled: true,
           hintText: hintText,
           hintStyle: const TextStyle(color: Colors.grey)),
-          
     );
   }
 }

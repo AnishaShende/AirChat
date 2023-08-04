@@ -122,6 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 25,
                   ),
                   MyTextField(
+                    focusNode: FocusNode(),
                     controller: emailController,
                     hintText: 'Email',
                     obscureText: false,
@@ -131,6 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 10,
                   ),
                   MyTextField(
+                    focusNode: FocusNode(),
                       controller: passwordController,
                       hintText: 'Password',
                       obscureText: true,

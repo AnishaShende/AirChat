@@ -310,16 +310,37 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? Text(
                               formattedTime,
                               style: TextStyle(
-                                  color: NeumorphicColors.darkBackground,
-                                  fontSize: 12),
+                                color: NeumorphicColors.darkBackground,
+                              ),
                             )
-                          : (isCurrentUserSender) ? Text(
-                              formattedTime,
-                              style: TextStyle(
-                                  color: NeumorphicColors.darkBackground,
-                                  fontSize: 12),
-                            ) : Icon(Icons.circle_rounded,
-                              color: Colors.greenAccent),
+                          : (isCurrentUserSender)
+                              ? Container(
+                                  margin: EdgeInsets.only(top: 3),
+                                  child: Text(
+                                    formattedTime,
+                                    style: TextStyle(
+                                        color: NeumorphicColors.darkBackground,
+                                        fontSize: 13),
+                                  ),
+                                )
+                              : Column(
+                                  children: [
+                                    Text(
+                                      formattedTime,
+                                      style: TextStyle(
+                                          color:
+                                              NeumorphicColors.darkBackground,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
+                                    SizedBox(
+                                      height: 3,
+                                    ),
+                                    Icon(Icons.circle_rounded,
+                                        color: Colors.greenAccent),
+                                  ],
+                                ),
+                      // ) :
                       // Text(
                       //   'N/A',
                       //   style:
