@@ -7,19 +7,19 @@ class Message {
   final String message;
   final String read;
   final String send;
+  final Type type;
   final Timestamp timestamp;
 
-  Message(
-      {required this.senderId,
-      required this.senderEmail,
-      required this.receiverId,
-      required this.timestamp,
-      required this.message,
-      required this.read,
-      required this.send,
-      });
-      
-
+  Message({
+    required this.senderId,
+    required this.senderEmail,
+    required this.receiverId,
+    required this.timestamp,
+    required this.message,
+    required this.read,
+    required this.send,
+    required this.type,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -30,10 +30,12 @@ class Message {
       'timestamp': timestamp,
       'read': read,
       'send': send,
+      'type': type.toString(),
     };
   }
 }
 
+enum Type {text, image}
 // class Message {
 //   Message({
 //     required this.toId,

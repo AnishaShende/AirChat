@@ -54,6 +54,7 @@ dependencies:
   chat_bubbles: ^1.4.1
   another_flutter_splash_screen: ^1.1.4
   intl: ^0.18.1
+  emoji_picker_flutter: ^1.6.1
   # flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:

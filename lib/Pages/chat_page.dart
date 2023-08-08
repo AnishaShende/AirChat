@@ -1,12 +1,19 @@
+import 'dart:io';
+import 'dart:developer';
+
 import 'package:chat_app/components/chat_bubble.dart';
 import 'package:chat_app/components/my_text_field.dart';
+import 'package:chat_app/modal/message.dart';
+import 'package:chat_bubbles/date_chips/date_chip.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
 import '../services/chat/chat_service.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 class ChatPage extends StatefulWidget {
   const ChatPage(
@@ -29,63 +36,33 @@ class _ChatPageState extends State<ChatPage> {
   late ScrollController _scrollController = ScrollController();
   final FocusNode _messageFocusNode = FocusNode();
   bool theme = false;
-  bool _isAtBottom = true;
+  // bool _isAtBottom = true;
+  bool _showEmoji = false;
+  bool _isUploading = false;
 
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
 
-    _scrollController.addListener(() {
-      listenScrolling();
-    });
-    // _scrollController = ScrollController();
+  //   _scrollController.addListener(() {
+  //     listenScrolling();
+  //   });
+  // }
 
-    // _scrollController.addListener(() {
-    //   // Update _isAtBottom based on the scroll position
+  // @override
+  // void dispose() {
+  //   _scrollController.dispose();
+  //   super.dispose();
+  // }
 
-    //   // _isAtBottom = (_scrollController.position.pixels ==
-    //   //     _scrollController.position.maxScrollExtent);
-
-    // if (_scrollController.position.pixels ==
-    //     _scrollController.position.maxScrollExtent) {
-    //   _isAtBottom = !_isAtBottom;
-    // } else {
-    //   _isAtBottom = !_isAtBottom;
-    // }
-    // setState(() {}); // To trigger a rebuild and update the arrow icon
-    // });
-
-    // _messageFocusNode.addListener(() {
-    //   if (_messageFocusNode.hasFocus) {
-    //     _scrollToBottom();
-    //   }
-    // });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void listenScrolling() {
-    // setState(() {});
-    if (_scrollController.position.pixels ==
-        _scrollController.position.minScrollExtent) {
-      _isAtBottom = false;
-      // setState(() {});
-    } else {
-      _isAtBottom = true;
-      // setState(() {});
-    }
-    // setState(() {});
-    // if (_scrollController.position.atEdge) {
-    //   _scrollToBottom();
-    //   //   _isAtBottom = false;
-    //   // } else {
-    //   // _isAtBottom = true;
-    // }
-  }
+  // void listenScrolling() {
+  //   if (_scrollController.position.pixels ==
+  //       _scrollController.position.minScrollExtent) {
+  //     _isAtBottom = false;
+  //   } else {
+  //     _isAtBottom = true;
+  //   }
+  // }
 
   void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
@@ -98,46 +75,138 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  void sendImageMessage() async {
+    // if (_messageController.text.isNotEmpty) {
+    //   await _chatService.sendMessage(
+    //       widget.receiverUserID, _messageController.text);
+    //   _messageController.clear();
+    // } else {
+    //   await _chatService.sendMessage(widget.receiverUserID, 'Hello!');
+    //   _messageController.clear();
+    // }
+
+    final ImagePicker picker = ImagePicker();
+
+    // Picking multiple images
+    final List<XFile> images = await picker.pickMultiImage(imageQuality: 80);
+
+    // uploading & sending image one by one
+    for (var i in images) {
+      log('Image Path: ${i.path}');
+      setState(() => _isUploading = true);
+      // await APIs.sendChatImage(widget.user, File(i.path));
+      setState(() => _isUploading = false);
+
+      await _chatService.sendChatImage(widget.receiverUserID, File(i.path));
+      // await _chatService.sendChatImage(
+      //     widget.receiverUserID, _messageController.text, Type.image);
+      // sendChatImage
+    }
+  }
+
+  void sendCameraMessage() async {
+    // if (_messageController.text.isNotEmpty) {
+    //   await _chatService.sendMessage(
+    //       widget.receiverUserID, _messageController.text);
+    //   _messageController.clear();
+    // } else {
+    //   await _chatService.sendMessage(widget.receiverUserID, 'Hello!');
+    //   _messageController.clear();
+    // }
+    final ImagePicker picker = ImagePicker();
+
+    // Pick an image
+    final XFile? image =
+        await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    if (image != null) {
+      log('Image Path: ${image.path}');
+      setState(() => _isUploading = true);
+
+      // await APIs.sendChatImage(widget.user, File(image.path));
+      setState(() => _isUploading = false);
+    }
+    await _chatService.sendChatImage(widget.receiverUserID, File(image!.path));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          theme ? NeumorphicColors.darkBackground : NeumorphicColors.background,
-      appBar: AppBar(
-        title: Text(widget.receiverUserName),
-        backgroundColor: const Color(0xFF333333),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              onPressed: () {
-                theme = !theme;
-                setState(() {});
-              },
-              icon: Icon(
-                Icons.favorite_rounded,
-                color: theme ? Colors.redAccent : NeumorphicColors.background,
-              ),
-              color: NeumorphicColors.darkBackground,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        child: WillPopScope(
+          //if emojis are shown & back button is pressed then hide emojis
+          //or else simple close current screen on back button click
+          onWillPop: () {
+            if (_showEmoji) {
+              setState(() => _showEmoji = !_showEmoji);
+              return Future.value(false);
+            } else {
+              return Future.value(true);
+            }
+          },
+          child: Scaffold(
+            backgroundColor: theme
+                ? NeumorphicColors.darkBackground
+                : NeumorphicColors.background,
+            appBar: AppBar(
+              title: Text(widget.receiverUserName),
+              backgroundColor: const Color(0xFF333333),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                    onPressed: () {
+                      theme = !theme;
+                      setState(() {});
+                    },
+                    icon: Icon(
+                      Icons.favorite_rounded,
+                      color: theme
+                          ? Colors.redAccent
+                          : NeumorphicColors.background,
+                    ),
+                    color: NeumorphicColors.darkBackground,
+                  ),
+                ),
+              ],
+            ),
+            body: Column(
+              children: [
+                Expanded(
+                  child: _buildMessageList(),
+                ),
+                if (_isUploading)
+                  const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                          child: CircularProgressIndicator(strokeWidth: 2))),
+
+                _buildMessageInput(),
+
+                //show emojis on keyboard emoji button click & vice versa
+                if (_showEmoji)
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * .35,
+                    child: EmojiPicker(
+                      textEditingController: _messageController,
+                      config: Config(
+                        bgColor: NeumorphicColors.darkBackground,
+                        columns: 8,
+                        emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
+                      ),
+                    ),
+                  )
+              ],
             ),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _buildMessageList(),
-          ),
-          _buildMessageInput(),
-        ],
+        ),
       ),
     );
   }
 
   bool _isChatScreenOpenedForUser(String userId) {
-    // Add your logic here to determine if the chat screen is opened for this user
-    // For example, you could compare the current user's ID with the provided userId
-    // and return true if they are the same.
     return FirebaseAuth.instance.currentUser!.uid == userId;
   }
 
@@ -181,6 +250,7 @@ class _ChatPageState extends State<ChatPage> {
           DateTime? currentDay;
 
           return ListView.builder(
+              reverse: true,
               controller: _scrollController,
               itemCount: messages.length,
               itemBuilder: (context, index) {
@@ -211,14 +281,18 @@ class _ChatPageState extends State<ChatPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          _formatDateHeader(currentDay!),
-                          style: TextStyle(
-                            fontSize: 16,
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
+                        child: DateChip(
+                          date: currentDay!,
+                          color: Colors.white,
                         ),
+                        // Text(
+                        //   _formatDateHeader(currentDay!),
+                        //   style: TextStyle(
+                        //     fontSize: 16,
+                        //     // fontWeight: FontWeight.bold,
+                        //     color: Colors.grey,
+                        //   ),
+                        // ),
                       ),
                       _buildMessageItem(data, userId),
                     ],
@@ -227,69 +301,9 @@ class _ChatPageState extends State<ChatPage> {
                   // For messages of the same day, display them without the date header.
                   return _buildMessageItem(data, userId);
                 }
-
-                // Mark the message as read if the receiver is the current user and the message is unread
-                // if (data['senderId'] != userId && data['read'].isEmpty) {
-                //   _chatService.markMessageAsRead(
-                //       document.id, userId, widget.receiverUserID);
-                // }
-                //     return ListView(
-                //       children: snapshot.data!.docs
-                //           .map((document) => _buildMessageItem(document))
-                //           .toList(),
-                //     );
-                //   },
-                // );
               });
         });
   }
-
-  //             Widget _buildMessageItem(DocumentSnapshot document) {
-  //               Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-  //             // if (data['read'].isEmpty) {
-  //             //   APIs.updateMessageReadStatus(widget.message);
-  //             // }
-
-  //             var alignment =
-  //                 (data['senderId'] == _firebaseAuth.currentUser!.uid)
-  //                     ? Alignment.centerRight
-  //                     : Alignment.centerLeft;
-  //             return Padding(
-  //               padding: const EdgeInsets.symmetric(horizontal: 5.0),
-  //               child: Container(
-  //                 alignment: alignment,
-  //                 child: Column(
-  //                   crossAxisAlignment:
-  //                       (data['senderId'] == _firebaseAuth.currentUser!.uid)
-  //                           ? CrossAxisAlignment.end
-  //                           : CrossAxisAlignment.start,
-  //                   mainAxisAlignment:
-  //                       (data['senderId'] == _firebaseAuth.currentUser!.uid)
-  //                           ? MainAxisAlignment.end
-  //                           : MainAxisAlignment.start,
-  //                   children: [
-  //                     // Text(data['senderEmail'],),
-  //                     const SizedBox(
-  //                       height: 5,
-  //                     ),
-  //                     // Text(data['message'],),
-  //                     ChatBubble(
-  //                       message: data['message'],
-  //                       theme: theme,
-  //                       isSender:
-  //                           (data['senderId'] == _firebaseAuth.currentUser!.uid)
-  //                               ? true
-  //                               : false,
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             );
-  //           },
-  //         );
-  //       });
-  // }
 
   // Function to build the message item widget
   Widget _buildMessageItem(Map<String, dynamic> data, String userId) {
@@ -308,15 +322,22 @@ class _ChatPageState extends State<ChatPage> {
               ? MainAxisAlignment.end
               : MainAxisAlignment.start,
           children: [
-            // Text(data['senderEmail'],),
             const SizedBox(
               height: 5,
-            ), // Text(data['message'],),
+            ),
+            // data['type'] == 'Type.text' ?
             ChatBubble(
               message: data['message'],
               theme: theme,
               isSender: (data['senderId'] == userId) ? true : false,
-            ),
+              type: data['type'],
+            )
+            // : ChatBubble(
+            //   message: data['message'],
+            //   theme: theme,
+            //   isSender: (data['senderId'] == userId) ? true : false,
+            //   type: data['type'],
+            // ) ,
           ],
         ),
       ),
@@ -332,31 +353,20 @@ class _ChatPageState extends State<ChatPage> {
       return 'Today';
     } else if (difference.inDays == 1) {
       return 'Yesterday';
-    } else
-    //  if (difference.inDays <= 2)
-    {
-      //   return 'Yesterday';
-      // } else {
-      //   // Format the date in your preferred way if the difference is more than 2 days.
-      // return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-      // Format the date using the intl package.
+    } else {
       final formatter = DateFormat('d MMMM y');
       return formatter.format(dateTime);
     }
   }
 
-  void _scrollToBottom() {
-    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    // animateTo(
-    //   _scrollController.position.maxScrollExtent,
-    //   duration: Duration(milliseconds: 0),
-    //   curve: Curves.easeOut,
-    // );
-    // _isAtBottom = true;
-    // setState(() {
-    // _isAtBottom = true;
-    // });
-  }
+  // void _scrollToBottom() {
+  //   _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+  //   // animateTo(
+  //   //   _scrollController.position.maxScrollExtent,
+  //   //   duration: Duration(milliseconds: 0),
+  //   //   curve: Curves.easeOut,
+  //   // );
+  // }
 
   Widget _buildMessageInput() {
     return Padding(
@@ -364,7 +374,10 @@ class _ChatPageState extends State<ChatPage> {
       child: Row(
         children: [
           IconButton(
-            onPressed: sendMessage,
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              setState(() => _showEmoji = !_showEmoji);
+            },
             icon: const Icon(Icons.emoji_emotions_outlined),
             iconSize: 30,
             color: theme
@@ -381,7 +394,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           IconButton(
-            onPressed: sendMessage,
+            onPressed: sendImageMessage,
             icon: const Icon(Icons.photo),
             iconSize: 30,
             color: theme
@@ -389,7 +402,7 @@ class _ChatPageState extends State<ChatPage> {
                 : NeumorphicColors.darkBackground,
           ),
           IconButton(
-            onPressed: sendMessage,
+            onPressed: sendCameraMessage,
             icon: const Icon(Icons.camera_enhance_rounded),
             iconSize: 30,
             color: theme
@@ -400,19 +413,17 @@ class _ChatPageState extends State<ChatPage> {
             padding: const EdgeInsets.all(6.0),
             child: IconButton(
               onPressed: () {
-                // setState(() {});
-                if (_isAtBottom) {
-                  sendMessage();
-
-                  // _scrollToBottom();
-                } else {
-                  _scrollToBottom();
-                  // _isAtBottom = true;
-                }
+                // if (_isAtBottom) {
+                sendMessage();
+                // } else {
+                //   _scrollToBottom();
+                // }
               },
-              icon: _isAtBottom
-                  ? Icon(Icons.arrow_upward)
-                  : Icon(Icons.arrow_downward),
+              icon:
+                  // _isAtBottom
+                  //     ?
+                  Icon(Icons.arrow_upward),
+              // : Icon(Icons.arrow_downward),
               iconSize: 40,
               color: theme
                   ? NeumorphicColors.background
@@ -424,57 +435,3 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 }
-// Widget _buildMessageInput() {
-
-//   return Padding(
-//     padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-//     child: Row(
-//       children: [
-//         IconButton(
-//           onPressed: sendMessage,
-//           icon: const Icon(Icons.emoji_emotions_outlined),
-//           iconSize: 30,
-//           color: theme
-//               ? NeumorphicColors.background
-//               : NeumorphicColors.darkBackground,
-//         ),
-//         Expanded(
-//           child: MyTextField(
-//             controller: _messageController,
-//             hintText: 'Enter message',
-//             obscureText: false,
-//             extraFeatures: false,
-//           ),
-//         ),
-//         IconButton(
-//           onPressed: sendMessage,
-//           icon: const Icon(Icons.photo),
-//           iconSize: 30,
-//           color: theme
-//               ? NeumorphicColors.background
-//               : NeumorphicColors.darkBackground,
-//         ),
-//         IconButton(
-//           onPressed: sendMessage,
-//           icon: const Icon(Icons.camera_enhance_rounded),
-//           iconSize: 30,
-//           color: theme
-//               ? NeumorphicColors.background
-//               : NeumorphicColors.darkBackground,
-//         ),
-//         Padding(
-//           padding: const EdgeInsets.all(6.0),
-//           child: IconButton(
-//             onPressed: sendMessage,
-//             icon: const Icon(Icons.arrow_upward),
-//             iconSize: 40,
-//             color: theme
-//                 ? NeumorphicColors.background
-//                 : NeumorphicColors.darkBackground,
-//           ),
-//         ),
-//       ],
-//     ),
-//   );
-// }
-// }

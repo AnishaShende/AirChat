@@ -368,7 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final UploadTask uploadTask =
-          storage.ref('AirChat/$filename').putFile(file);
+          storage.ref('AirChat/Profiles/$filename').putFile(file);
       final TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
       final String fileURL = await snapshot.ref.getDownloadURL();
       image = fileURL;
@@ -393,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final UploadTask uploadTask =
-          storage.ref('AirChat/$filename').putFile(file);
+          storage.ref('AirChat/Profiles/$filename').putFile(file);
       final TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
       final String fileURL = await snapshot.ref.getDownloadURL();
       image = fileURL;
@@ -415,7 +415,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<String?> uploadFileWeb(Uint8List fileBytes, String filename) async {
     try {
-      final Reference ref = storage.ref('AirChat/$filename');
+      final Reference ref = storage.ref('AirChat/Profiles/$filename');
 
       // Upload the file to Cloud Storage using putData method for web
       final TaskSnapshot snapshot = await ref.putData(fileBytes);

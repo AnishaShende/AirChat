@@ -299,12 +299,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       subtitle: Padding(
                         padding: const EdgeInsets.only(left: 7),
-                        child: Text(
-                          lastMes,
-                          maxLines: 1,
-                          style:
-                              TextStyle(color: NeumorphicColors.darkBackground),
-                        ),
+                        child: data['type'] == 'Type.text'
+                            ? Text(
+                                lastMes,
+                                maxLines: 1,
+                                style: TextStyle(
+                                    color: NeumorphicColors.darkBackground),
+                              )
+                            : Row(
+                                children: [
+                                  Icon(Icons.photo_filter_rounded),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(':)', style: TextStyle(fontWeight: FontWeight.w600),)
+                                ],
+                              ),
                       ),
                       trailing: (isRead)
                           ? Text(
