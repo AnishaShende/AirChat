@@ -193,9 +193,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // await _auth.currentUser!.delete();
   }
 
-  void signOut() {
+  void signOut() async {
     Navigator.of(context).pop();
     final authServices = Provider.of<AuthServices>(context, listen: false);
     authServices.signOut();
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({
+      'isOnline': false,
+      'lastActive': DateTime.now().millisecondsSinceEpoch.toString(),
+    });
   }
 }

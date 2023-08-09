@@ -1,27 +1,50 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/services/chat/chat_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
 import 'package:intl/intl.dart';
 
 import 'chat_page.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class UserScreen extends StatefulWidget {
+  const UserScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<UserScreen> createState() => _UserScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _UserScreenState extends State<UserScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String formattedTime = '';
   bool isRead = false;
   late bool isCurrentUserSender = true;
   String lastMes = '';
+  String receiverUserID = '';
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   SystemChannels.lifecycle.setMessageHandler((message) {
+  //     log('Message: $message');
+
+  //     if (FirebaseAuth.instance.currentUser != null) {
+  //       if (message.toString().contains('resume')) {
+  //         updateActiveStatus(true);
+  //       }
+  //       if (message.toString().contains('pause')) {
+  //         updateActiveStatus(false);
+  //       }
+  //     }
+
+  //     return Future.value(message);
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -242,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
           //     }
 
           if (_auth.currentUser!.email != data['email']) {
+            receiverUserID = data['uid'];
             return Padding(
               padding: const EdgeInsets.only(top: 15, right: 15, left: 15),
               child: SizedBox(
@@ -304,17 +328,45 @@ class _HomeScreenState extends State<HomeScreen> {
                                 lastMes,
                                 maxLines: 1,
                                 style: TextStyle(
-                                    color: NeumorphicColors.darkBackground),
+                                  color: NeumorphicColors.darkBackground,
+                                ),
                               )
-                            : Row(
-                                children: [
-                                  Icon(Icons.photo_filter_rounded),
-                                  SizedBox(
-                                    width: 5,
+                            : data['type'] == 'Type.image'
+                                ? Row(
+                                    children: [
+                                      Icon(Icons.photo_filter_rounded),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        ':)',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  )
+                                : Text(
+                                    '',
+                                    maxLines: 1,
                                   ),
-                                  Text(':)', style: TextStyle(fontWeight: FontWeight.w600),)
-                                ],
-                              ),
+                        // data['type'] == 'Type.text'
+                        // ? Text(
+                        //     lastMes,
+                        //     maxLines: 1,
+                        //     style: TextStyle(
+                        //         color: NeumorphicColors.darkBackground),
+                        //   )
+                        // : Row(
+                        //     children: [
+                        //       Icon(Icons.photo_filter_rounded),
+                        //       SizedBox(
+                        //         width: 5,
+                        //       ),
+                        //       Text(
+                        //         ':)',
+                        //         style:
+                        //             TextStyle(fontWeight: FontWeight.w600),
+                        //       )
+                        //     ],
+                        //   ),
                       ),
                       trailing: (isRead)
                           ? Text(
@@ -404,6 +456,17 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         });
   }
+
+  // Future<void> updateActiveStatus(bool isOnline) async {
+  //   FirebaseFirestore.instance
+  //       .collection('users')
+  //       .doc(FirebaseAuth.instance.currentUser!.uid)
+  //       .update({
+  //     'isOnline': isOnline,
+  //     'lastActive': DateTime.now().millisecondsSinceEpoch.toString(),
+  //     // 'push_token': me.pushToken,
+  //   });
+  // }
 
   Future<void> _handleRefresh() async {
     return await Future.delayed(Duration(seconds: 2));

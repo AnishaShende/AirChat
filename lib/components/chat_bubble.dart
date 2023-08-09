@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/components/my_dialog.dart';
+// import 'package:chat_app/components/my_dialog.dart';
 import 'package:chat_bubbles/bubbles/bubble_normal_image.dart';
 import 'package:chat_bubbles/bubbles/bubble_special_one.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +29,7 @@ class ChatBubble extends StatelessWidget {
       );
     } else {
       return BubbleNormalImage(
-        id: 'id0001',
+        id: DateTime.now().toString(), //'id0001',
         image: CachedNetworkImage(
           imageUrl: message,
           placeholder: (context, url) => CircularProgressIndicator(

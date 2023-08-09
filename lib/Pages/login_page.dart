@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
         if (user != null) {
           log('\nUser: ${user.user}');
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+              context, MaterialPageRoute(builder: (_) => const UserScreen()));
         }
       });
     } catch (error) {
@@ -133,10 +133,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   MyTextField(
                     focusNode: FocusNode(),
-                      controller: passwordController,
-                      hintText: 'Password',
-                      obscureText: true,
-                      extraFeatures: false,),
+                    controller: passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                    extraFeatures: false,
+                  ),
                   const SizedBox(
                     height: 25,
                   ),

@@ -1,8 +1,20 @@
-import 'package:anim_search_bar/anim_search_bar.dart';
+// import 'dart:developer';
+
+// import 'package:anim_search_bar/anim_search_bar.dart';
+// import 'package:chat_app/Pages/chat_page.dart';
+import 'dart:developer';
+
 import 'package:chat_app/Pages/users_screen.dart';
-import 'package:chat_app/services/auth/auth_services.dart';
+import 'package:chat_app/components/my_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+// import 'package:chat_app/services/auth/auth_services.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/services.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
@@ -25,12 +37,35 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0; // Current selected index of the bottom navigation bar
 
   final List<Widget> _pages = [
-    const HomeScreen(),
+    const UserScreen(),
     const HistoryScreen(),
     SettingsScreen(),
   ];
 
   TextEditingController textController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState(); 
+    log('Hellloooooo 1');
+    updateActiveStatus(true);
+    log('Hellloooooo 2');
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      log('Message: $message');
+
+      if (FirebaseAuth.instance.currentUser != null) {
+        if (message.toString().contains('resume')) {
+          updateActiveStatus(true);
+        }
+        if (message.toString().contains('pause')) {
+          updateActiveStatus(false);
+        }
+      }
+
+      return Future.value(message);
+    });
+  }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +131,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // static Future<void> updateActiveStatus(bool isOnline)async {
+  //   FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+  //     'isOnline': isOnline,
+  //     'lastActive': DateTime.now().millisecondsSinceEpoch.toString(),
+  //     // 'push_token': me.pushToken,
+  //   });
+  // }
   // Widget _buildUserList() {
   //   return StreamBuilder<QuerySnapshot>(
   //     stream: FirebaseFirestore.instance.collection('users').snapshots(),
@@ -138,4 +180,29 @@ class _HomePageState extends State<HomePage> {
   //     return Container();
   //   }
   // }
+  Future<void> updateActiveStatus(bool isOnline) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      log('Inside the function updateActiveStatus');
+      if (user != null) {
+        log('Before Firestore update');
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+          'isOnline': isOnline,
+          'lastActive': DateTime.now().millisecondsSinceEpoch.toString(),
+        });
+        log('Updated successfullyyyy');
+      } else {
+        // Handle the case when the user is not authenticated
+        log('User is not authenticated');
+      }
+    } catch (e) {
+      // Handle Firestore update errors
+      log('Error updating user status: $e');
+      MyDialog.mySnackBar(context, 'Error updating user active status :(');
+      // You can provide user feedback or perform other actions here
+    }
+  }
 }

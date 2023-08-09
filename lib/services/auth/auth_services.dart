@@ -16,8 +16,7 @@ class AuthServices extends ChangeNotifier {
       _firestore.collection('users').doc(userCredential.user!.uid).set({
         'uid': userCredential.user!.uid,
         'email': email,
-      }, SetOptions(merge: true)
-      );
+      }, SetOptions(merge: true));
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
@@ -36,6 +35,8 @@ class AuthServices extends ChangeNotifier {
         'email': email,
         'name': name,
         'imageURL': '',
+        'isOnline': true,
+        'lastActive': '',
       });
 
       return userCredential;
@@ -49,7 +50,8 @@ class AuthServices extends ChangeNotifier {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
