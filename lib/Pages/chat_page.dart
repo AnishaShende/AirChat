@@ -294,7 +294,7 @@ class _ChatPageState extends State<ChatPage> {
     return GestureDetector(
       onTap: (){
         Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const ViewProfile()));
+              context, MaterialPageRoute(builder: (_) => ViewProfile(receiverUserEmail: widget.receiverUserEmail, receiverUserName: widget.receiverUserName, receiverUserID: widget.receiverUserID)));
       },
       child: InkWell(
           child: StreamBuilder(
