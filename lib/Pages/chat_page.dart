@@ -7,12 +7,14 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/Pages/view_profile.dart';
 import 'package:chat_app/components/chat_bubble.dart';
+import 'package:chat_app/components/my_dialog.dart';
 import 'package:chat_app/components/my_text_field.dart';
 import 'package:chat_bubbles/date_chips/date_chip.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
@@ -38,6 +40,15 @@ class _ChatPageState extends State<ChatPage> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   late ScrollController _scrollController = ScrollController();
   final FocusNode _messageFocusNode = FocusNode();
+
+  late String sendTime;
+  late String readTime;
+  late String message;
+  late String messageType;
+  late String messageId;
+  late String currentUserId;
+  late String receiverUserId;
+
   bool theme = false;
   // bool _isAtBottom = true;
   bool _showEmoji = false;
@@ -153,8 +164,8 @@ class _ChatPageState extends State<ChatPage> {
                 : NeumorphicColors.background,
             appBar: AppBar(
               backgroundColor: theme
-                ? NeumorphicColors.darkBackground
-                : NeumorphicColors.background,
+                  ? NeumorphicColors.darkBackground
+                  : NeumorphicColors.background,
               automaticallyImplyLeading: false,
               flexibleSpace: _appBar(),
             ),
@@ -292,9 +303,14 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _appBar() {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => ViewProfile(receiverUserEmail: widget.receiverUserEmail, receiverUserName: widget.receiverUserName, receiverUserID: widget.receiverUserID)));
+            context,
+            MaterialPageRoute(
+                builder: (_) => ViewProfile(
+                    receiverUserEmail: widget.receiverUserEmail,
+                    receiverUserName: widget.receiverUserName,
+                    receiverUserID: widget.receiverUserID)));
       },
       child: InkWell(
           child: StreamBuilder(
@@ -322,7 +338,7 @@ class _ChatPageState extends State<ChatPage> {
                 // Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
                 // final list =
                 // data?.map((e) => ChatUser.fromJson(e.data())).toList() ?? [];
-    
+
                 // ChatGPT's code (ChatGPT - The Saviour, here to rescue)
                 final docdata = snapshot.data?.docs;
                 Map<String, dynamic> data = {};
@@ -338,9 +354,9 @@ class _ChatPageState extends State<ChatPage> {
                     //back button
                     IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon:
-                            const Icon(Icons.arrow_back, color: Colors.black54)),
-    
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.black54)),
+
                     //user profile picture
                     ClipRRect(
                       borderRadius: BorderRadius.circular(
@@ -350,8 +366,9 @@ class _ChatPageState extends State<ChatPage> {
                         height: MediaQuery.of(context).size.height * .05,
                         imageUrl: data['imageURL'].toString(),
                         // list.isNotEmpty ? list[0].image : widget.user.image,
-                        errorWidget: (context, url, error) => const CircleAvatar(
-                            child: Icon(CupertinoIcons.person)),
+                        errorWidget: (context, url, error) =>
+                            const CircleAvatar(
+                                child: Icon(CupertinoIcons.person)),
                       ),
                     ),
                     //for adding some space
@@ -367,10 +384,10 @@ class _ChatPageState extends State<ChatPage> {
                                 fontSize: 16,
                                 color: Colors.black87,
                                 fontWeight: FontWeight.w500)),
-    
+
                         //for adding some space
                         const SizedBox(height: 2),
-    
+
                         //last seen time of user
                         Text(
                             // data.isNotEmpty
@@ -382,7 +399,7 @@ class _ChatPageState extends State<ChatPage> {
                             //     : MyDateUtil.getLastActiveTime(
                             //         context: context,
                             //         lastActive: widget.user.lastActive),
-    
+
                             data.isNotEmpty
                                 ? data['isOnline']
                                     ? 'Active rn'
@@ -394,9 +411,13 @@ class _ChatPageState extends State<ChatPage> {
                                     context: context,
                                     lastActive: data['lastActive'],
                                   ),
-                            style: data['isOnline'] ? TextStyle(
-                                fontSize: 13, color: Colors.greenAccent[400], fontWeight: FontWeight.w600): TextStyle(
-                                fontSize: 13, color: Colors.black54)),
+                            style: data['isOnline']
+                                ? TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.greenAccent[400],
+                                    fontWeight: FontWeight.w600)
+                                : TextStyle(
+                                    fontSize: 13, color: Colors.black54)),
                       ],
                     )
                   ],
@@ -457,6 +478,14 @@ class _ChatPageState extends State<ChatPage> {
                 Map<String, dynamic> data =
                     document.data() as Map<String, dynamic>;
 
+                readTime = data['read'];
+                sendTime = data['send'];
+                message = data['message'];
+                messageType = data['type'];
+                messageId = document.id;
+                currentUserId = userId;
+                receiverUserId = widget.receiverUserID;
+
                 if (data['senderId'] != userId && data['read'].isEmpty) {
                   _chatService.markMessageAsRead(
                       document.id, userId, widget.receiverUserID);
@@ -506,6 +535,7 @@ class _ChatPageState extends State<ChatPage> {
 
   // Function to build the message item widget
   Widget _buildMessageItem(Map<String, dynamic> data, String userId) {
+    bool isMe = data['senderId'] == userId;
     var alignment = (data['senderId'] == userId)
         ? Alignment.centerRight
         : Alignment.centerLeft;
@@ -525,11 +555,16 @@ class _ChatPageState extends State<ChatPage> {
               height: 5,
             ),
             // data['type'] == 'Type.text' ?
-            ChatBubble(
-              message: data['message'],
-              theme: theme,
-              isSender: (data['senderId'] == userId) ? true : false,
-              type: data['type'],
+            InkWell(
+              onLongPress: () {
+                _showBottomSheet(isMe);
+              },
+              child: ChatBubble(
+                message: data['message'],
+                theme: theme,
+                isSender: (data['senderId'] == userId) ? true : false,
+                type: data['type'],
+              ),
             )
             // : ChatBubble(
             //   message: data['message'],
@@ -632,5 +667,220 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
     );
+  }
+
+  void _showBottomSheet(bool isMe) {
+    showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+        builder: (_) {
+          return ListView(
+            shrinkWrap: true,
+            children: [
+              //black divider
+              Container(
+                height: 4,
+                margin: EdgeInsets.symmetric(
+                    vertical: MediaQuery.of(context).size.height * .015,
+                    horizontal: MediaQuery.of(context).size.width * .4),
+                decoration: BoxDecoration(
+                    color: Colors.grey, borderRadius: BorderRadius.circular(8)),
+              ),
+
+              messageType == "Type.text"
+                  ?
+                  //copy option
+                  _OptionItem(
+                      icon: const Icon(Icons.copy_all_rounded,
+                          color: Colors.blue, size: 26),
+                      name: 'Copy Text',
+                      onTap: () async {
+                        await Clipboard.setData(ClipboardData(text: message))
+                            .then((value) {
+                          //for hiding bottom sheet
+                          Navigator.pop(context);
+
+                          MyDialog.mySnackBar(context, 'Text Copied!');
+                        });
+                      })
+                  :
+                  //save option
+                  _OptionItem(
+                      icon: const Icon(Icons.download_rounded,
+                          color: Colors.blue, size: 26),
+                      name: 'Save Image',
+                      onTap: () async {
+                        try {
+                          log('Image Url: ${message}');
+                          // await GallerySaver.saveImage(message,
+                          //         albumName: 'We Chat')
+                          //     .then((success) {
+                          //   //for hiding bottom sheet
+                          //   Navigator.pop(context);
+                          //   if (success != null && success) {
+                          //     MyDialog.mySnackBar(
+                          //         context, 'Image Successfully Saved!');
+                          //   }
+                          // });
+                        } catch (e) {
+                          log('ErrorWhileSavingImg: $e');
+                        }
+                      }),
+
+              //separator or divider
+              if (isMe)
+                Divider(
+                  color: Colors.black54,
+                  endIndent: MediaQuery.of(context).size.width * .04,
+                  indent: MediaQuery.of(context).size.width * .04,
+                ),
+
+              //edit option
+              if (messageType == "Type.text" && isMe)
+                _OptionItem(
+                    icon: const Icon(Icons.edit, color: Colors.blue, size: 26),
+                    name: 'Edit Message',
+                    onTap: () {
+                      //for hiding bottom sheet
+                      Navigator.pop(context);
+
+                      _showMessageUpdateDialog();
+                    }),
+
+              //delete option
+              if (isMe)
+                _OptionItem(
+                    icon: const Icon(Icons.delete_forever,
+                        color: Colors.red, size: 26),
+                    name: 'Delete Message',
+                    onTap: () async {
+                      await ChatService()
+                          .deleteMessage(messageId, currentUserId,
+                              receiverUserId, messageType, message)
+                          .then((value) {
+                        //for hiding bottom sheet
+                        Navigator.pop(context);
+                      });
+                    }),
+
+              //separator or divider
+              Divider(
+                color: Colors.black54,
+                endIndent: MediaQuery.of(context).size.width * .04,
+                indent: MediaQuery.of(context).size.width * .04,
+              ),
+
+              //sent time
+              _OptionItem(
+                  icon: const Icon(Icons.remove_red_eye, color: Colors.blue),
+                  name:
+                      'Sent At: $sendTime', // ${getMessageTime(context: context, time: widget.message.sent)}
+                  onTap: () {}),
+
+              //read time
+              _OptionItem(
+                  icon: const Icon(Icons.remove_red_eye, color: Colors.green),
+                  name: readTime.isEmpty
+                      ? 'Read At: Not seen yet'
+                      : 'Read At: $readTime', // ${getMessageTime(context: context, time: widget.message.read)}
+                  onTap: () {}),
+            ],
+          );
+        });
+  }
+
+  void _showMessageUpdateDialog() {
+    String updatedMsg = message; // widget.message.msg;
+
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              contentPadding: const EdgeInsets.only(
+                  left: 24, right: 24, top: 20, bottom: 10),
+
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+
+              //title
+              title: Row(
+                children: const [
+                  Icon(
+                    Icons.message,
+                    color: Colors.blue,
+                    size: 28,
+                  ),
+                  Text(' Update Message')
+                ],
+              ),
+
+              //content
+              content: TextFormField(
+                initialValue: updatedMsg,
+                maxLines: null,
+                onChanged: (value) => updatedMsg = value,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15))),
+              ),
+
+              //actions
+              actions: [
+                //cancel button
+                MaterialButton(
+                    onPressed: () {
+                      //hide alert dialog
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.blue, fontSize: 16),
+                    )),
+
+                //update button
+                MaterialButton(
+                    onPressed: () {
+                      //hide alert dialog
+                      Navigator.pop(context);
+                      ChatService().updateMessage(
+                          updatedMsg, messageId, currentUserId, receiverUserId);
+                    },
+                    child: const Text(
+                      'Update',
+                      style: TextStyle(color: Colors.blue, fontSize: 16),
+                    ))
+              ],
+            ));
+  }
+}
+
+class _OptionItem extends StatelessWidget {
+  final Icon icon;
+  final String name;
+  final VoidCallback onTap;
+
+  const _OptionItem(
+      {required this.icon, required this.name, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+        onTap: () => onTap(),
+        child: Padding(
+          padding: EdgeInsets.only(
+              left: MediaQuery.of(context).size.width * .05,
+              top: MediaQuery.of(context).size.height * .015,
+              bottom: MediaQuery.of(context).size.height * .015),
+          child: Row(children: [
+            icon,
+            Flexible(
+                child: Text('    $name',
+                    style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.black54,
+                        letterSpacing: 0.5)))
+          ]),
+        ));
   }
 }

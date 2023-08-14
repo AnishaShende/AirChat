@@ -37,6 +37,7 @@ class AuthServices extends ChangeNotifier {
         'imageURL': '',
         'isOnline': true,
         'lastActive': '',
+        'pushNotification': '',
       });
 
       return userCredential;

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chat_app/Pages/push_notifications.dart';
 import 'package:chat_app/modal/message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,7 +38,20 @@ class ChatService extends ChangeNotifier {
         .collection('chat_rooms')
         .doc(chatRoomId)
         .collection('messages')
-        .add(newMessage.toMap());
+        .add(newMessage.toMap())
+        .then((value) async {
+      // Fetch user data from Firestore
+      DocumentSnapshot senderSnapshot =
+          await _firestore.collection('users').doc(currentUserId).get();
+
+      if (senderSnapshot.exists) {
+        String token = senderSnapshot['pushNotification'];
+        String userName = senderSnapshot['name'];
+
+        // Send push notification with token and username
+        sendPushNotification(token, userName, message, currentUserId);
+      }
+    });
   }
 
   Stream<QuerySnapshot> getMessages(String userId, String otherUserId) {
@@ -108,6 +122,54 @@ class ChatService extends ChangeNotifier {
         .collection('chat_rooms')
         .doc(chatRoomId)
         .collection('messages')
-        .add(newMessage.toMap());
+        .add(newMessage.toMap())
+        .then((value) async {
+      // Fetch user data from Firestore
+      DocumentSnapshot senderSnapshot =
+          await _firestore.collection('users').doc(currentUserId).get();
+
+      if (senderSnapshot.exists) {
+        String token = senderSnapshot['pushNotification'];
+        String userName = senderSnapshot['name'];
+
+        // Send push notification with token and username
+        sendPushNotification(token, userName, 'image', currentUserId);
+      }
+    });
+  }
+
+  Future<void> deleteMessage(String messageId, String userId,
+      String otherUserId, String type, String message) async {
+    // final String currentUserId = _auth.currentUser!.uid;
+
+    List<String> ids = [userId, otherUserId];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    await FirebaseFirestore.instance
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .doc(messageId)
+        .delete();
+
+    if (type == "Type.image") {
+      await FirebaseStorage.instance.refFromURL(message).delete();
+    }
+  }
+
+  Future<void> updateMessage(String updatedmessage, String messageId,
+      String userId, String otherUserId) async {
+    List<String> ids = [userId, otherUserId];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    await FirebaseFirestore.instance
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .doc(messageId)
+        // .doc(message.sent)
+        .update({'message': updatedmessage});
   }
 }

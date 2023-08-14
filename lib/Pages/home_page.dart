@@ -4,6 +4,7 @@
 // import 'package:chat_app/Pages/chat_page.dart';
 import 'dart:developer';
 
+import 'package:chat_app/Pages/push_notifications.dart';
 import 'package:chat_app/Pages/users_screen.dart';
 import 'package:chat_app/components/my_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -46,7 +47,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    super.initState(); 
+    super.initState();
     log('Hellloooooo 1');
     updateActiveStatus(true);
     log('Hellloooooo 2');
@@ -192,6 +193,7 @@ class _HomePageState extends State<HomePage> {
             .update({
           'isOnline': isOnline,
           'lastActive': DateTime.now().millisecondsSinceEpoch.toString(),
+          'pushNotification': await getFirebaseMessagingToken(),
         });
         log('Updated successfullyyyy');
       } else {

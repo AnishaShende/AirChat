@@ -56,6 +56,12 @@ dependencies:
   intl: ^0.18.1
   emoji_picker_flutter: ^1.6.1
   flutter_polygon_clipper: ^1.0.4
+  full_screen_image: ^2.0.0
+  firebase_messaging: ^14.6.5
+  firebase_analytics: ^10.4.4
+  http: ^1.1.0
+  flutter_notification_channel: ^2.0.0
+  image_gallery_saver: ^2.0.3
   # flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:

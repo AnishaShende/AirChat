@@ -27,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final FirebaseStorage storage = FirebaseStorage.instance;
   var currentUser = FirebaseAuth.instance.currentUser;
-  String userName = '';
+  late String userName;
 
   @override
   void initState() {

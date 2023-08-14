@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:full_screen_image/full_screen_image.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
 import 'package:intl/intl.dart';
@@ -297,18 +298,23 @@ class _UserScreenState extends State<UserScreen> {
                       // leading: CircleAvatar(
                       //   child: Icon(Icons.person),
                       // ),
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: CachedNetworkImage(
-                          imageUrl: data['imageURL'],
-                          height: MediaQuery.of(context).size.height * 0.06,
-                          width: MediaQuery.of(context).size.height * 0.06,
-                          fit: BoxFit.cover,
-                          // 'assets/images/kim_taehyung_profile.jfif',
-                          placeholder: (context, url) =>
-                              CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => CircleAvatar(
-                            child: Icon(Icons.person),
+                      leading: FullScreenWidget(
+                        disposeLevel: DisposeLevel.High,
+                        // backgroundIsTransparent: true,
+                        // backgroundColor: Colors.transparent,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: CachedNetworkImage(
+                            imageUrl: data['imageURL'],
+                            height: MediaQuery.of(context).size.height * 0.06,
+                            width: MediaQuery.of(context).size.height * 0.06,
+                            fit: BoxFit.cover,
+                            // 'assets/images/kim_taehyung_profile.jfif',
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) => CircleAvatar(
+                              child: Icon(Icons.person),
+                            ),
                           ),
                         ),
                       ),
